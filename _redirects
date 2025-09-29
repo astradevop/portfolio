@@ -1,0 +1,17 @@
+# Redirect rules for Netlify
+# Handle client-side routing
+
+# Home page variations
+/home /
+/about /
+
+# Legacy routes
+/projects.html /projects.html 200
+/blog.html /blog.html 200
+/playground.html /playground.html 200
+
+# API endpoints (not needed for static site, but good for form handling)
+/contact /
+
+# 404 fallback
+/* /index.html 404

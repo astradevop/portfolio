@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /assets/data/
+Allow: /
+
+Sitemap: https://astradevop.github.io/portfolio/sitemap.xml

@@ -1,0 +1,58 @@
+[
+    {
+        "name": "Django",
+        "description": "High-level Python web framework",
+        "icon": "django",
+        "proficiency": 90,
+        "projects": 8
+    },
+    {
+        "name": "Python",
+        "description": "Versatile programming language",
+        "icon": "python",
+        "proficiency": 95,
+        "projects": 12
+    },
+    {
+        "name": "JavaScript",
+        "description": "Dynamic web programming language",
+        "icon": "javascript",
+        "proficiency": 85,
+        "projects": 10
+    },
+    {
+        "name": "Tailwind CSS",
+        "description": "Utility-first CSS framework",
+        "icon": "tailwind",
+        "proficiency": 90,
+        "projects": 6
+    },
+    {
+        "name": "PostgreSQL",
+        "description": "Advanced open-source database",
+        "icon": "postgresql",
+        "proficiency": 80,
+        "projects": 5
+    },
+    {
+        "name": "jQuery",
+        "description": "Fast JavaScript library",
+        "icon": "jquery",
+        "proficiency": 85,
+        "projects": 7
+    },
+    {
+        "name": "HTML5",
+        "description": "Modern markup language",
+        "icon": "html5",
+        "proficiency": 95,
+        "projects": 15
+    },
+    {
+        "name": "CSS3",
+        "description": "Styling and layout language",
+        "icon": "css3",
+        "proficiency": 90,
+        "projects": 15
+    }
+]

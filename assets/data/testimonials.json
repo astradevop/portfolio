@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Sarah Johnson",
+        "role": "Product Manager",
+        "company": "TechCorp Inc.",
+        "avatar": "./assets/img/testimonials/sarah-johnson.jpg",
+        "quote": "Akash delivered exceptional work on our web application. His attention to detail and technical expertise made our project a huge success."
+    },
+    {
+        "name": "Mike Chen",
+        "role": "Lead Developer",
+        "company": "StartupXYZ",
+        "avatar": "./assets/img/testimonials/mike-chen.jpg",
+        "quote": "Working with Akash was a pleasure. He brought creative solutions to complex problems and delivered high-quality code on time."
+    },
+    {
+        "name": "Emily Davis",
+        "role": "CTO",
+        "company": "Digital Solutions",
+        "avatar": "./assets/img/testimonials/emily-davis.jpg",
+        "quote": "Akash's full-stack skills and dedication to clean code made him an invaluable part of our development team."
+    }
+]
