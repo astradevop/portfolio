@@ -2,11 +2,25 @@
 
 /* Navigation styles */
 .nav-link {
-    @apply text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors;
+    @apply text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-all duration-200 relative;
+}
+
+.nav-link.active {
+    @apply text-primary-600 dark:text-primary-400;
+}
+
+.nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-200;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    @apply w-full;
 }
 
 .mobile-nav-link {
-    @apply block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-md;
+    @apply block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 rounded-md;
 }
 
 /* Animation keyframes */
@@ -68,16 +82,18 @@
     box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Navbar scrolled state */
+/* Navbar styles */
 .navbar-scrolled {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.3) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
 .dark .navbar-scrolled {
-    background-color: rgba(17, 24, 39, 0.95);
-    border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+    background-color: rgba(17, 24, 39, 0.95) !important;
+    border-bottom: 1px solid rgba(75, 85, 99, 0.3) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Smooth transitions for theme switching */

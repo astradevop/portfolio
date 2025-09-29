@@ -339,11 +339,81 @@ window.PortfolioApp = {
     // Load dynamic content
     async loadDynamicContent() {
         await Promise.all([
+            this.loadStats(),
             this.loadTechStack(),
             this.loadFeaturedProjects(),
             this.loadBlogPosts(),
             this.loadTestimonials()
         ]);
+    },
+
+    async loadStats() {
+        try {
+            const response = await fetch('/.netlify/functions/stats');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            this.renderStats(result.data);
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+            // Fallback to default values
+            this.renderStats({
+                projects: 6,
+                commits: 450,
+                hours_coding: 1200,
+                technologies: 12
+            });
+        }
+    },
+
+    renderStats(stats) {
+        const container = document.getElementById('stats-container');
+        if (!container) return;
+
+        const statsHtml = [
+            {
+                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>`,
+                count: stats.projects,
+                label: 'Projects',
+                gradient: 'from-primary-500 to-secondary-500'
+            },
+            {
+                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>`,
+                count: stats.commits,
+                label: 'Commits',
+                gradient: 'from-green-500 to-teal-500'
+            },
+            {
+                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>`,
+                count: stats.hours_coding,
+                label: 'Hours Coding',
+                gradient: 'from-orange-500 to-red-500'
+            },
+            {
+                icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>`,
+                count: stats.technologies,
+                label: 'Technologies',
+                gradient: 'from-purple-500 to-pink-500'
+            }
+        ];
+
+        container.innerHTML = statsHtml.map(stat => `
+            <div class="text-center group">
+                <div class="bg-gradient-to-r ${stat.gradient} p-4 rounded-2xl w-16 h-16 mx-auto mb-4 flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${stat.icon}
+                    </svg>
+                </div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white counter" data-target="${stat.count}">0</div>
+                <div class="text-gray-600 dark:text-gray-400 font-medium">${stat.label}</div>
+            </div>
+        `).join('');
+
+        // Initialize counter animations for new stats
+        this.setupCounters();
     },
     
     async loadTechStack() {
