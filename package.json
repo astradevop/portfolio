@@ -1,0 +1,20 @@
+{
+  "name": "portfolio-netlify",
+  "version": "1.0.0",
+  "description": "Portfolio website with Netlify Functions and Neon Database",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Static build complete'",
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/neon": "^0.2.0",
+    "@netlify/functions": "^2.4.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.10.1"
+  },
+  "keywords": ["portfolio", "netlify", "neon", "serverless"],
+  "author": "Akash Nair",
+  "license": "MIT"
+}

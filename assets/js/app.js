@@ -348,8 +348,15 @@ window.PortfolioApp = {
     
     async loadTechStack() {
         try {
-            const response = await fetch('./assets/data/tech-stack.json');
-            const techStack = await response.json();
+            const response = await fetch('/.netlify/functions/tech-stack');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            // Convert database result to expected format
+            const techStack = Object.values(result.data).flat();
             
             const container = document.getElementById('tech-stack-container');
             if (!container) return;
@@ -376,7 +383,7 @@ window.PortfolioApp = {
                         </div>
                         
                         <div class="text-center">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">${tech.projects} projects</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">${tech.category}</span>
                         </div>
                     </div>
                 </div>
@@ -405,9 +412,14 @@ window.PortfolioApp = {
     
     async loadFeaturedProjects() {
         try {
-            const response = await fetch('./assets/data/projects.json');
-            const data = await response.json();
-            const featuredProjects = data.filter(project => project.featured).slice(0, 6);
+            const response = await fetch('/.netlify/functions/projects?featured=true&limit=6');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            const featuredProjects = result.data;
             
             const container = document.getElementById('featured-projects-container');
             if (!container) return;
@@ -421,27 +433,25 @@ window.PortfolioApp = {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div class="absolute bottom-4 left-4 right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform opacity-0 group-hover:opacity-100">
                             <div class="flex space-x-2">
-                                ${project.live_url ? `<a href="${project.live_url}" target="_blank" class="px-3 py-1 bg-primary-600 text-white text-sm rounded-full hover:bg-primary-700">Live Demo</a>` : ''}
-                                ${project.repo_url ? `<a href="${project.repo_url}" target="_blank" class="px-3 py-1 bg-gray-800 text-white text-sm rounded-full hover:bg-gray-900">GitHub</a>` : ''}
+                                ${project.demo_url ? `<a href="${project.demo_url}" target="_blank" class="px-3 py-1 bg-primary-600 text-white text-sm rounded-full hover:bg-primary-700">Live Demo</a>` : ''}
+                                ${project.github_url ? `<a href="${project.github_url}" target="_blank" class="px-3 py-1 bg-gray-800 text-white text-sm rounded-full hover:bg-gray-900">GitHub</a>` : ''}
                             </div>
                         </div>
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">${project.title}</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">${project.summary}</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">${project.description}</p>
                         <div class="flex flex-wrap gap-2 mb-4">
-                            ${project.tech_tags.slice(0, 3).map(tag => `
+                            ${(project.technologies || []).slice(0, 3).map(tag => `
                                 <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-xs rounded-full">${tag}</span>
                             `).join('')}
                         </div>
-                        ${project.stars ? `
-                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                                ${project.stars} stars
-                            </div>
-                        ` : ''}
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            ${project.category}
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -452,9 +462,14 @@ window.PortfolioApp = {
     
     async loadBlogPosts() {
         try {
-            const response = await fetch('./assets/data/blog-posts.json');
-            const posts = await response.json();
-            const recentPosts = posts.slice(0, 4);
+            const response = await fetch('/.netlify/functions/blog-posts?limit=4');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            const recentPosts = result.data;
             
             const container = document.getElementById('blog-posts-container');
             if (!container) return;
@@ -465,12 +480,12 @@ window.PortfolioApp = {
                         <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
                             <time datetime="${post.published_at}">${new Date(post.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
                             <span class="mx-2">•</span>
-                            <span>${post.reading_time || '5'} min read</span>
+                            <span>${post.read_time || '5'} min read</span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">${post.title}</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">${post.summary}</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">${post.excerpt}</p>
                         <div class="flex flex-wrap gap-2 mb-4">
-                            ${post.tags.slice(0, 2).map(tag => `
+                            ${(post.tags || []).slice(0, 2).map(tag => `
                                 <span class="px-2 py-1 bg-secondary-100 dark:bg-secondary-900/30 text-secondary-800 dark:text-secondary-300 text-xs rounded-full">${tag}</span>
                             `).join('')}
                         </div>
@@ -490,8 +505,14 @@ window.PortfolioApp = {
     
     async loadTestimonials() {
         try {
-            const response = await fetch('./assets/data/testimonials.json');
-            const testimonials = await response.json();
+            const response = await fetch('/.netlify/functions/testimonials');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            const testimonials = result.data;
             
             const container = document.getElementById('testimonials-container');
             const dotsContainer = document.getElementById('testimonial-dots');
@@ -509,7 +530,7 @@ window.PortfolioApp = {
                                         </svg>
                                     </div>
                                     <blockquote class="text-xl md:text-2xl text-gray-700 dark:text-gray-300 font-medium mb-8 leading-relaxed">
-                                        "${testimonial.quote}"
+                                        "${testimonial.content}"
                                     </blockquote>
                                     <div class="flex items-center justify-center space-x-4">
                                         <img src="${testimonial.avatar || './assets/img/avatar-placeholder.svg'}" 
@@ -518,7 +539,7 @@ window.PortfolioApp = {
                                              onerror="this.src='./assets/img/avatar-placeholder.svg'">
                                         <div class="text-left">
                                             <div class="font-bold text-gray-900 dark:text-white">${testimonial.name}</div>
-                                            <div class="text-sm text-gray-600 dark:text-gray-400">${testimonial.role}</div>
+                                            <div class="text-sm text-gray-600 dark:text-gray-400">${testimonial.position}</div>
                                             <div class="text-sm text-primary-600 dark:text-primary-400">${testimonial.company}</div>
                                         </div>
                                     </div>
@@ -596,12 +617,30 @@ window.PortfolioApp = {
                 submitSpinner.classList.remove('hidden');
                 
                 try {
-                    // If you're using Formspree or similar service, the form will submit naturally
-                    // For demo purposes, we'll simulate a successful submission
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    this.showToast('Message sent successfully! I\'ll get back to you soon.', 'success');
-                    contactForm.reset();
+                    const formData = new FormData(contactForm);
+                    const data = {
+                        name: formData.get('name'),
+                        email: formData.get('email'),
+                        subject: formData.get('subject'),
+                        message: formData.get('message')
+                    };
+
+                    const response = await fetch('/.netlify/functions/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showToast(result.message || 'Message sent successfully! I\'ll get back to you soon.', 'success');
+                        contactForm.reset();
+                    } else {
+                        this.showToast(result.error || 'Failed to send message. Please try again.', 'error');
+                    }
                     
                 } catch (error) {
                     this.showToast('Failed to send message. Please try again or contact me directly.', 'error');

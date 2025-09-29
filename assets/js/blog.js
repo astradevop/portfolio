@@ -22,8 +22,14 @@ class BlogManager {
     
     async loadPosts() {
         try {
-            const response = await fetch('./assets/data/blog-posts.json');
-            this.posts = await response.json();
+            const response = await fetch('/.netlify/functions/blog-posts');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            this.posts = result.data;
             this.filteredPosts = [...this.posts];
         } catch (error) {
             console.error('Failed to load blog posts:', error);
@@ -66,15 +72,15 @@ class BlogManager {
         if (this.currentFilters.search) {
             filtered = filtered.filter(post => 
                 post.title.toLowerCase().includes(this.currentFilters.search) ||
-                post.summary.toLowerCase().includes(this.currentFilters.search) ||
-                post.tags.some(tag => tag.toLowerCase().includes(this.currentFilters.search))
+                post.excerpt.toLowerCase().includes(this.currentFilters.search) ||
+                (post.tags || []).some(tag => tag.toLowerCase().includes(this.currentFilters.search))
             );
         }
         
         // Apply tag filter
         if (this.currentFilters.tag) {
             filtered = filtered.filter(post => 
-                post.tags.includes(this.currentFilters.tag)
+                (post.tags || []).includes(this.currentFilters.tag)
             );
         }
         
@@ -141,7 +147,7 @@ class BlogManager {
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            ${post.reading_time || 5} min read
+                            ${post.read_time || 5} min read
                         </span>
                         ${post.views ? `
                             <span class="mx-3">•</span>
@@ -162,11 +168,11 @@ class BlogManager {
                     </h2>
                     
                     <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed text-lg">
-                        ${post.summary}
+                        ${post.excerpt}
                     </p>
                     
                     <div class="flex flex-wrap gap-2 mb-6">
-                        ${post.tags.map(tag => `
+                        ${(post.tags || []).map(tag => `
                             <span class="px-3 py-1 bg-secondary-100 dark:bg-secondary-900/30 text-secondary-800 dark:text-secondary-300 text-sm rounded-full font-medium cursor-pointer hover:bg-secondary-200 dark:hover:bg-secondary-900/50 transition-colors"
                                   onclick="blogManager.filterByTag('${tag}')">${tag}</span>
                         `).join('')}
@@ -297,7 +303,7 @@ class BlogManager {
                         </div>
                         <div>
                             <div class="font-semibold text-gray-900 dark:text-white">Akash Nair</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">${formattedDate} • ${post.reading_time || 5} min read</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">${formattedDate} • ${post.read_time || 5} min read</div>
                         </div>
                     </div>
                     <button onclick="this.closest('.fixed').remove()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
@@ -310,7 +316,7 @@ class BlogManager {
                     <div class="mb-6">
                         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">${post.title}</h1>
                         <div class="flex flex-wrap gap-2">
-                            ${post.tags.map(tag => `
+                            ${(post.tags || []).map(tag => `
                                 <span class="px-3 py-1 bg-secondary-100 dark:bg-secondary-900/30 text-secondary-800 dark:text-secondary-300 text-sm rounded-full font-medium">${tag}</span>
                             `).join('')}
                         </div>
@@ -318,10 +324,10 @@ class BlogManager {
                     
                     <div class="prose dark:prose-invert max-w-none">
                         <div class="text-xl text-gray-600 dark:text-gray-400 leading-relaxed mb-8 font-medium">
-                            ${post.summary}
+                            ${post.excerpt}
                         </div>
                         <div class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                            ${this.renderMarkdown(post.body_md)}
+                            ${this.renderMarkdown(post.content || 'Full content would be loaded from the database...')}
                         </div>
                     </div>
                     

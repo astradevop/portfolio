@@ -23,8 +23,14 @@ class ProjectsManager {
     
     async loadProjects() {
         try {
-            const response = await fetch('./assets/data/projects.json');
-            this.projects = await response.json();
+            const response = await fetch('/.netlify/functions/projects');
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+            
+            this.projects = result.data;
             this.filteredProjects = [...this.projects];
         } catch (error) {
             console.error('Failed to load projects:', error);
@@ -76,15 +82,15 @@ class ProjectsManager {
         if (this.currentFilters.search) {
             filtered = filtered.filter(project => 
                 project.title.toLowerCase().includes(this.currentFilters.search) ||
-                project.summary.toLowerCase().includes(this.currentFilters.search) ||
-                project.tech_tags.some(tag => tag.toLowerCase().includes(this.currentFilters.search))
+                project.description.toLowerCase().includes(this.currentFilters.search) ||
+                (project.technologies || []).some(tag => tag.toLowerCase().includes(this.currentFilters.search))
             );
         }
         
         // Apply tag filter
         if (this.currentFilters.tag) {
             filtered = filtered.filter(project => 
-                project.tech_tags.includes(this.currentFilters.tag)
+                (project.technologies || []).includes(this.currentFilters.tag)
             );
         }
         
@@ -150,8 +156,8 @@ class ProjectsManager {
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="absolute bottom-4 left-4 right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 opacity-0 group-hover:opacity-100">
                         <div class="flex space-x-2">
-                            ${project.live_url ? `<a href="${project.live_url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-primary-600 text-white text-sm rounded-full hover:bg-primary-700 transition-colors">Live Demo</a>` : ''}
-                            ${project.repo_url ? `<a href="${project.repo_url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-gray-800 text-white text-sm rounded-full hover:bg-gray-900 transition-colors">GitHub</a>` : ''}
+                            ${project.demo_url ? `<a href="${project.demo_url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-primary-600 text-white text-sm rounded-full hover:bg-primary-700 transition-colors">Live Demo</a>` : ''}
+                            ${project.github_url ? `<a href="${project.github_url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-gray-800 text-white text-sm rounded-full hover:bg-gray-900 transition-colors">GitHub</a>` : ''}
                         </div>
                     </div>
                     ${project.featured ? '<div class="absolute top-4 right-4 px-2 py-1 bg-primary-600 text-white text-xs rounded-full">Featured</div>' : ''}
@@ -161,14 +167,14 @@ class ProjectsManager {
                         ${project.title}
                     </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
-                        ${project.summary}
+                        ${project.description}
                     </p>
                     <div class="flex flex-wrap gap-2 mb-4">
-                        ${project.tech_tags.slice(0, 4).map(tag => `
+                        ${(project.technologies || []).slice(0, 4).map(tag => `
                             <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-xs rounded-full font-medium cursor-pointer hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
                                   onclick="projectsManager.filterByTag('${tag}')">${tag}</span>
                         `).join('')}
-                        ${project.tech_tags.length > 4 ? `<span class="text-xs text-gray-500 dark:text-gray-400">+${project.tech_tags.length - 4} more</span>` : ''}
+                        ${(project.technologies || []).length > 4 ? `<span class="text-xs text-gray-500 dark:text-gray-400">+${(project.technologies || []).length - 4} more</span>` : ''}
                     </div>
                     <div class="flex items-center justify-between">
                         ${project.stars ? `
@@ -179,7 +185,7 @@ class ProjectsManager {
                                 ${project.stars}
                             </div>
                         ` : '<div></div>'}
-                        <button onclick="projectsManager.showProjectDetails('${project.slug}')" 
+                        <button onclick="projectsManager.showProjectDetails(${project.id})" 
                                 class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium text-sm transition-colors">
                             View Details →
                         </button>
@@ -284,8 +290,8 @@ class ProjectsManager {
         this.applyFilters();
     }
     
-    showProjectDetails(slug) {
-        const project = this.projects.find(p => p.slug === slug);
+    showProjectDetails(id) {
+        const project = this.projects.find(p => p.id === id);
         if (!project) return;
         
         // Create a simple modal with project details
@@ -307,16 +313,16 @@ class ProjectsManager {
                          class="w-full h-64 object-cover rounded-xl mb-6"
                          onerror="this.src='./assets/img/project-placeholder.jpg'">
                     <div class="prose dark:prose-invert max-w-none mb-6">
-                        <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">${project.summary}</p>
+                        <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">${project.description}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 mb-6">
-                        ${project.tech_tags.map(tag => `
+                        ${(project.technologies || []).map(tag => `
                             <span class="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-sm rounded-full font-medium">${tag}</span>
                         `).join('')}
                     </div>
                     <div class="flex space-x-4">
-                        ${project.live_url ? `<a href="${project.live_url}" target="_blank" rel="noopener noreferrer" class="btn-neuro bg-primary-600 hover:bg-primary-700 text-white px-6 py-3">Live Demo</a>` : ''}
-                        ${project.repo_url ? `<a href="${project.repo_url}" target="_blank" rel="noopener noreferrer" class="btn-neuro bg-gray-800 hover:bg-gray-900 text-white px-6 py-3">View Code</a>` : ''}
+                        ${project.demo_url ? `<a href="${project.demo_url}" target="_blank" rel="noopener noreferrer" class="btn-neuro bg-primary-600 hover:bg-primary-700 text-white px-6 py-3">Live Demo</a>` : ''}
+                        ${project.github_url ? `<a href="${project.github_url}" target="_blank" rel="noopener noreferrer" class="btn-neuro bg-gray-800 hover:bg-gray-900 text-white px-6 py-3">View Code</a>` : ''}
                     </div>
                     ${project.stars ? `
                         <div class="flex items-center mt-4 text-gray-500 dark:text-gray-400">
