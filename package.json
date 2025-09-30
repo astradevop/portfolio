@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@netlify/neon": "^0.1.0",
-    "@netlify/functions": "^2.4.1"
+    "@netlify/functions": "^2.4.1",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "netlify-cli": "^17.10.1"

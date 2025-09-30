@@ -2,35 +2,25 @@ import { neon } from '@netlify/neon';
 
 const sql = neon(process.env.NETLIFY_DATABASE_URL);
 
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Content-Type': 'application/json',
+};
+
 export async function handler(event, context) {
-  // Set CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Content-Type': 'application/json',
-  };
 
-  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
+    return { statusCode: 200, headers, body: '' };
   }
-
+  
   if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   try {
-    // Parse query parameters
-    const { featured, category, limit } = event.queryStringParameters || {};
+    const { featured, category, limit } = event.queryStringParameters ?? {};
     
     let query = `
       SELECT 
@@ -76,15 +66,13 @@ export async function handler(event, context) {
 
   } catch (error) {
     console.error('Database error:', error);
-    
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: 'Failed to fetch projects',
-        message: error.message,
-      }),
+        error: 'Failed to fetch projects'
+      })
     };
   }
 }

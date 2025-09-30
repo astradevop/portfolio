@@ -338,13 +338,21 @@ window.PortfolioApp = {
     
     // Load dynamic content
     async loadDynamicContent() {
-        await Promise.all([
+        const loadPromises = [
+            this.loadProfile(),
             this.loadStats(),
-            this.loadTechStack(),
+            this.loadTechStack(), 
             this.loadFeaturedProjects(),
             this.loadBlogPosts(),
-            this.loadTestimonials()
-        ]);
+            this.loadTestimonials(),
+            this.loadExperienceEducation()
+        ];
+        
+        try {
+            await Promise.all(loadPromises);
+        } catch (error) {
+            console.warn('Some content failed to load:', error);
+        }
     },
 
     async loadStats() {
@@ -361,10 +369,10 @@ window.PortfolioApp = {
             console.error('Failed to load stats:', error);
             // Fallback to default values
             this.renderStats({
-                projects: 6,
-                commits: 450,
-                hours_coding: 1200,
-                technologies: 12
+                projects: 1,
+                commits: 150,
+                hours_coding: 500,
+                technologies: 8
             });
         }
     },
@@ -425,8 +433,10 @@ window.PortfolioApp = {
                 throw new Error(result.error);
             }
             
-            // Convert database result to expected format
-            const techStack = Object.values(result.data).flat();
+            // Handle both array and grouped object formats
+            const techStack = Array.isArray(result.data) 
+                ? result.data 
+                : Object.values(result.data).flat();
             
             const container = document.getElementById('tech-stack-container');
             if (!container) return;
@@ -477,6 +487,11 @@ window.PortfolioApp = {
             observer.observe(container);
         } catch (error) {
             console.error('Failed to load tech stack:', error);
+            // Show minimal fallback
+            const container = document.getElementById('tech-stack-container');
+            if (container) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500">Tech stack loading...</p>';
+            }
         }
     },
     
@@ -527,6 +542,10 @@ window.PortfolioApp = {
             `).join('');
         } catch (error) {
             console.error('Failed to load featured projects:', error);
+            const container = document.getElementById('featured-projects-container');
+            if (container) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500">Projects loading...</p>';
+            }
         }
     },
     
@@ -631,6 +650,214 @@ window.PortfolioApp = {
         } catch (error) {
             console.error('Failed to load testimonials:', error);
         }
+    },
+
+    // Load profile data from database
+    async loadProfile() {
+        try {
+            const response = await fetch('/.netlify/functions/profile');
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                this.updateProfileData(result.data.profile, result.data.settings);
+            }
+        } catch (error) {
+            console.error('Failed to load profile:', error);
+        }
+    },
+
+    // Update profile data in the UI
+    updateProfileData(profile, settings) {
+        if (!profile) return;
+
+        // Update name in hero section
+        const heroName = document.querySelector('.gradient-text');
+        if (heroName) heroName.textContent = profile.name.split(' ')[0];
+
+        // Update title in hero section
+        const heroTitle = document.querySelector('#typewriter');
+        if (heroTitle && settings?.typewriter_words) {
+            heroTitle.dataset.words = JSON.stringify(settings.typewriter_words);
+            this.setupTypewriter(); // Restart typewriter with new words
+        }
+
+        // Update bio
+        const bioElements = document.querySelectorAll('p');
+        bioElements.forEach(p => {
+            if (p.textContent.includes('Passionate about creating')) {
+                p.textContent = profile.bio;
+            }
+        });
+
+        // Update email links
+        const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
+        emailLinks.forEach(link => {
+            link.href = `mailto:${profile.email}`;
+        });
+
+        // Update email text
+        const emailTexts = document.querySelectorAll('p');
+        emailTexts.forEach(p => {
+            if (p.textContent.includes('aakash.s.nair@example.com')) {
+                p.textContent = profile.email;
+            }
+        });
+
+        // Update phone
+        if (profile.phone) {
+            const phoneElements = document.querySelectorAll('p');
+            phoneElements.forEach(p => {
+                if (p.textContent.includes('+91')) {
+                    p.textContent = profile.phone;
+                }
+            });
+        }
+
+        // Update location
+        if (profile.location) {
+            const locationElements = document.querySelectorAll('p');
+            locationElements.forEach(p => {
+                if (p.textContent.includes('Kochi, Kerala')) {
+                    p.textContent = profile.location;
+                }
+            });
+        }
+
+        // Update social links
+        if (profile.github_url) {
+            const githubLinks = document.querySelectorAll('a[href*="github.com"]');
+            githubLinks.forEach(link => link.href = profile.github_url);
+        }
+
+        if (profile.linkedin_url) {
+            const linkedinLinks = document.querySelectorAll('a[href*="linkedin.com"]');
+            linkedinLinks.forEach(link => link.href = profile.linkedin_url);
+        }
+
+        // Update page title and meta
+        if (profile.website_title) {
+            document.title = profile.website_title;
+        }
+
+        if (profile.website_description) {
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) metaDesc.content = profile.website_description;
+        }
+
+        // Update footer name
+        const footerNames = document.querySelectorAll('.gradient-text');
+        footerNames.forEach(nameEl => {
+            if (nameEl.closest('footer')) {
+                nameEl.textContent = profile.name;
+            }
+        });
+    },
+
+    // Load experience and education data
+    async loadExperienceEducation() {
+        try {
+            const response = await fetch('/.netlify/functions/experience-education');
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                this.renderExperienceEducation(result.data);
+            }
+        } catch (error) {
+            console.error('Failed to load experience and education:', error);
+            // Keep loading indicator or show fallback
+        }
+    },
+
+    // Render experience and education section
+    renderExperienceEducation(data) {
+        const container = document.getElementById('experience-education-container');
+        if (!container || (!data.experience?.length && !data.education?.length)) return;
+
+        let html = '<div class="max-w-4xl mx-auto">';
+
+        // Experience section
+        if (data.experience?.length) {
+            html += `
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Work Experience</h3>
+                    <div class="space-y-8">
+            `;
+            
+            data.experience.forEach((exp, index) => {
+                const startDate = new Date(exp.start_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                const endDate = exp.is_current ? 'Present' : new Date(exp.end_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                
+                html += `
+                    <div class="relative pl-8 pb-8 ${index < data.experience.length - 1 ? 'border-l-2 border-gray-200 dark:border-gray-700' : ''}">
+                        <div class="absolute -left-2 top-0 w-4 h-4 bg-primary-500 rounded-full"></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-soft">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                                <div>
+                                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">${exp.position}</h4>
+                                    <p class="text-lg text-primary-600 dark:text-primary-400 font-medium">${exp.company}</p>
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-2 md:mt-0">
+                                    <span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">${startDate} - ${endDate}</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">${exp.description || ''}</p>
+                            ${exp.technologies?.length ? `
+                                <div class="flex flex-wrap gap-2">
+                                    ${exp.technologies.map(tech => `
+                                        <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-xs rounded-full">${tech}</span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+        }
+
+        // Education section
+        if (data.education?.length) {
+            html += `
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Education</h3>
+                    <div class="space-y-6">
+            `;
+            
+            data.education.forEach(edu => {
+                const startDate = new Date(edu.start_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                const endDate = new Date(edu.end_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                
+                html += `
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-soft">
+                        <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                            <div>
+                                <h4 class="text-xl font-bold text-gray-900 dark:text-white">${edu.degree}</h4>
+                                <p class="text-lg text-secondary-600 dark:text-secondary-400 font-medium">${edu.institution}</p>
+                                ${edu.field_of_study ? `<p class="text-gray-600 dark:text-gray-400">${edu.field_of_study}</p>` : ''}
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-2 md:mt-0">
+                                <span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">${startDate} - ${endDate}</span>
+                            </div>
+                        </div>
+                        ${edu.description ? `<p class="text-gray-600 dark:text-gray-300 mb-4">${edu.description}</p>` : ''}
+                        ${edu.achievements?.length ? `
+                            <div class="space-y-1">
+                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Achievements:</p>
+                                <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                                    ${edu.achievements.map(achievement => `<li>${achievement}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
     },
     
     setupCarousel() {
