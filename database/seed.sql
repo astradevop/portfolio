@@ -24,7 +24,7 @@ INSERT INTO tech_stack (name, icon, category, description, proficiency, display_
 INSERT INTO testimonials (name, position, company, content, avatar, rating, is_featured, display_order, is_active) VALUES
 ('Sarah Johnson', 'Product Manager', 'FinTech Solutions', 'Akash delivered an exceptional banking platform with robust security features. His deep understanding of financial systems and attention to compliance made our project a success.', '/assets/img/testimonials/sarah.jpg', 5, true, 1, true),
 ('Michael Chen', 'CTO', 'Digital Banking Corp', 'Working with Akash on our neobanking solution was remarkable. His expertise in Django and scalable architecture helped us build a platform that handles thousands of transactions seamlessly.', '/assets/img/testimonials/michael.jpg', 5, true, 2, true),
-('Emily Rodriguez', 'Lead Developer', 'Banking Innovation Labs', 'Akash\'s ability to implement complex financial workflows with clean, maintainable code is impressive. His React frontend work created an intuitive user experience for our customers.', '/assets/img/testimonials/emily.jpg', 5, true, 3, true);
+('Emily Rodriguez', 'Lead Developer', 'Banking Innovation Labs', 'Akash''s ability to implement complex financial workflows with clean, maintainable code is impressive. His React frontend work created an intuitive user experience for our customers.', '/assets/img/testimonials/emily.jpg', 5, true, 3, true);
 
 -- Insert profile information
 INSERT INTO profile_info (name, title, bio, email, phone, location, github_url, linkedin_url, avatar_url, website_title, website_description, is_active) VALUES
@@ -52,7 +52,7 @@ INSERT INTO services (name, description, icon, features, display_order, is_activ
 INSERT INTO site_settings (key, value, type, description) VALUES
 ('site_title', 'Akash Nair - Full-Stack Python Web Developer', 'text', 'Main site title'),
 ('site_description', 'Experienced full-stack developer specializing in Python, Django, JavaScript, and modern web technologies.', 'text', 'Site meta description'),
-('hero_title', 'Hi, I\'m Akash', 'text', 'Hero section main title'),
+('hero_title', 'Hi, I''m Akash', 'text', 'Hero section main title'),
 ('hero_subtitle', 'Full-Stack Python Web Developer', 'text', 'Hero section subtitle'),
 ('typewriter_words', '["Full-Stack Python Web Developer", "AI Enthusiast", "Problem Solver"]', 'json', 'Typewriter animation words'),
 ('contact_form_enabled', 'true', 'boolean', 'Enable/disable contact form'),
