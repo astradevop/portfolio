@@ -21,7 +21,14 @@ window.PortfolioApp = {
         this.setupCarousel();
         this.setupContactForm();
         
-        console.log('Portfolio app initialized');
+        // NEW ASTONISHING FEATURES
+        this.setupParticleSystem();
+        this.setupMouseFollower();
+        this.setupMorphingText();
+        this.setupInteractiveAvatar();
+        this.setupAdvancedScrollEffects();
+        
+        console.log('🚀 Astonishing Portfolio initialized with advanced effects!');
     },
     
     // Theme management
@@ -950,6 +957,447 @@ window.PortfolioApp = {
                 }
             });
         }
+    },
+
+    /* ========================================
+       ASTONISHING INTERACTIVE FEATURES
+       ======================================== */
+
+    // Particle System - Dynamic canvas animation
+    setupParticleSystem() {
+        const canvas = document.getElementById('particle-canvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: 0, y: 0 };
+
+        // Resize canvas
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Particle class
+        class Particle {
+            constructor(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.life = Math.random() * 1000 + 500;
+                this.age = 0;
+                this.color = this.getRandomColor();
+            }
+
+            getRandomColor() {
+                const colors = ['59,130,246', '139,92,246', '236,72,153', '245,158,11', '34,197,94'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.age++;
+
+                // Fade out over time
+                this.opacity = Math.max(0, this.opacity - 0.001);
+
+                // Apply mouse interaction
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 100) {
+                    const force = (100 - distance) / 100;
+                    this.vx += (dx / distance) * force * 0.01;
+                    this.vy += (dy / distance) * force * 0.01;
+                }
+
+                // Boundaries
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                // Reset if too old or invisible
+                if (this.age > this.life || this.opacity <= 0) {
+                    this.reset();
+                }
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.age = 0;
+                this.color = this.getRandomColor();
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add glow effect
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+                gradient.addColorStop(0, `rgba(${this.color}, ${this.opacity * 0.5})`);
+                gradient.addColorStop(1, `rgba(${this.color}, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        // Mouse tracking
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+
+        // Animation loop
+        const animate = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections between nearby particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) {
+                        ctx.save();
+                        ctx.globalAlpha = (120 - distance) / 120 * 0.2;
+                        ctx.strokeStyle = this.theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+    },
+
+    // Mouse Follower - Interactive cursor effects
+    setupMouseFollower() {
+        const follower = document.getElementById('mouse-follower');
+        const trail = document.getElementById('mouse-trail');
+        
+        if (!follower || !trail) return;
+
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+        let trailX = 0, trailY = 0;
+
+        // Mouse movement tracking
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Instant update for trail
+            trail.style.left = e.clientX + 'px';
+            trail.style.top = e.clientY + 'px';
+        });
+
+        // Smooth follower animation
+        const animateFollower = () => {
+            const speed = 0.2;
+            
+            followerX += (mouseX - followerX) * speed;
+            followerY += (mouseY - followerY) * speed;
+            
+            follower.style.left = followerX + 'px';
+            follower.style.top = followerY + 'px';
+            
+            requestAnimationFrame(animateFollower);
+        };
+        animateFollower();
+
+        // Interactive hover effects
+        const interactiveElements = document.querySelectorAll('a, button, .interactive');
+        
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                follower.style.transform = 'scale(3)';
+                follower.style.background = 'rgba(59, 130, 246, 0.3)';
+                trail.style.opacity = '0.8';
+            });
+            
+            el.addEventListener('mouseleave', () => {
+                follower.style.transform = 'scale(1)';
+                follower.style.background = 'rgba(59, 130, 246, 0.2)';
+                trail.style.opacity = '0.3';
+            });
+        });
+    },
+
+    // Morphing Text - Dynamic text transitions
+    setupMorphingText() {
+        const morphingText = document.getElementById('morphing-text');
+        if (!morphingText) return;
+
+        const words = JSON.parse(morphingText.dataset.words || '["Developer"]');
+        let currentWordIndex = 0;
+        let currentCharIndex = 0;
+        let isDeleting = false;
+        let isWaiting = false;
+
+        const typeSpeed = 100;
+        const deleteSpeed = 50;
+        const waitTime = 2000;
+
+        const type = () => {
+            const currentWord = words[currentWordIndex];
+            
+            if (isWaiting) {
+                setTimeout(() => {
+                    isWaiting = false;
+                    isDeleting = true;
+                    type();
+                }, waitTime);
+                return;
+            }
+            
+            if (isDeleting) {
+                morphingText.textContent = currentWord.substring(0, currentCharIndex - 1);
+                currentCharIndex--;
+                
+                if (currentCharIndex === 0) {
+                    isDeleting = false;
+                    currentWordIndex = (currentWordIndex + 1) % words.length;
+                    setTimeout(type, 500);
+                    return;
+                }
+            } else {
+                morphingText.textContent = currentWord.substring(0, currentCharIndex + 1);
+                currentCharIndex++;
+                
+                if (currentCharIndex === currentWord.length) {
+                    isWaiting = true;
+                    type();
+                    return;
+                }
+            }
+            
+            setTimeout(type, isDeleting ? deleteSpeed : typeSpeed);
+        };
+
+        // Add cursor blink effect
+        morphingText.style.borderRight = '2px solid';
+        morphingText.style.animation = 'blink 1s infinite';
+        
+        // Add blink animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes blink {
+                0%, 50% { border-color: currentColor; }
+                51%, 100% { border-color: transparent; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Start typing animation
+        setTimeout(type, 1000);
+    },
+
+    // Interactive Avatar - 3D hover and click effects
+    setupInteractiveAvatar() {
+        const avatar = document.getElementById('interactive-avatar');
+        if (!avatar) return;
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let isAnimating = false;
+
+        // Mouse tracking for 3D effect
+        avatar.addEventListener('mousemove', (e) => {
+            if (isAnimating) return;
+            
+            const rect = avatar.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            mouseX = (e.clientX - centerX) / (rect.width / 2);
+            mouseY = (e.clientY - centerY) / (rect.height / 2);
+            
+            const rotateX = mouseY * 10;
+            const rotateY = -mouseX * 10;
+            
+            avatar.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+        });
+
+        // Reset on mouse leave
+        avatar.addEventListener('mouseleave', () => {
+            avatar.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+
+        // Click animation
+        avatar.addEventListener('click', () => {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            avatar.style.animation = 'none';
+            
+            // Trigger celebration animation
+            avatar.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(360deg) scale3d(1.2, 1.2, 1.2)';
+            avatar.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            
+            // Create particle burst effect
+            this.createParticleBurst(avatar);
+            
+            setTimeout(() => {
+                avatar.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                avatar.style.transition = 'transform 0.3s ease-out';
+                isAnimating = false;
+            }, 600);
+        });
+    },
+
+    // Create particle burst effect
+    createParticleBurst(element) {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: fixed;
+                width: 8px;
+                height: 8px;
+                background: linear-gradient(45deg, #3B82F6, #8B5CF6, #EC4899);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9999;
+                left: ${centerX}px;
+                top: ${centerY}px;
+            `;
+            
+            document.body.appendChild(particle);
+            
+            const angle = (i / 20) * Math.PI * 2;
+            const velocity = 5 + Math.random() * 5;
+            const vx = Math.cos(angle) * velocity;
+            const vy = Math.sin(angle) * velocity;
+            
+            let x = centerX;
+            let y = centerY;
+            let opacity = 1;
+            
+            const animate = () => {
+                x += vx;
+                y += vy + 0.5; // gravity
+                opacity -= 0.02;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.opacity = opacity;
+                particle.style.transform = `scale(${opacity})`;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    particle.remove();
+                }
+            };
+            
+            animate();
+        }
+    },
+
+    // Advanced Scroll Effects - Parallax and reveal animations
+    setupAdvancedScrollEffects() {
+        // Enhanced parallax for multiple elements
+        const parallaxElements = [
+            { selector: '.floating-shapes .shape-1', speed: 0.5 },
+            { selector: '.floating-shapes .shape-2', speed: -0.3 },
+            { selector: '.floating-shapes .shape-3', speed: 0.7 },
+            { selector: '.tech-preview', speed: 0.4 },
+            { selector: '.floating-cards .status-card', speed: -0.2 },
+            { selector: '.floating-cards .stats-card', speed: 0.6 }
+        ];
+
+        // Scroll-triggered counter animations
+        const counters = document.querySelectorAll('#projects-count, #experience-years');
+        let countersAnimated = false;
+
+        window.addEventListener('scroll', this.debounce(() => {
+            const scrollY = window.scrollY;
+            const heroHeight = window.innerHeight;
+            
+            // Parallax effects
+            parallaxElements.forEach(({ selector, speed }) => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    const yPos = -(scrollY * speed);
+                    element.style.transform = `translate3d(0, ${yPos}px, 0)`;
+                });
+            });
+
+            // Animate counters when they come into view
+            if (!countersAnimated && scrollY > heroHeight * 0.3) {
+                countersAnimated = true;
+                counters.forEach(counter => {
+                    this.animateCounter(counter);
+                });
+            }
+
+            // Dynamic background color shift
+            const heroSection = document.getElementById('home');
+            if (heroSection && scrollY < heroHeight) {
+                const opacity = Math.min(scrollY / heroHeight, 0.3);
+                heroSection.style.background = `linear-gradient(135deg, 
+                    rgba(59, 130, 246, ${opacity}) 0%, 
+                    rgba(139, 92, 246, ${opacity * 0.8}) 50%, 
+                    rgba(236, 72, 153, ${opacity * 0.6}) 100%)`;
+            }
+        }, 16));
+    },
+
+    // Animate counter numbers
+    animateCounter(element) {
+        const target = parseInt(element.textContent.replace(/\D/g, ''));
+        const duration = 2000;
+        const increment = target / (duration / 16);
+        let current = 0;
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current) + '+';
+        }, 16);
     },
     
     // Utility functions

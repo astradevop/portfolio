@@ -49,6 +49,9 @@ This portfolio uses **Neon PostgreSQL** for dynamic content management:
 
 📖 **Detailed Instructions**: See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for complete setup guide
 
+### 📚 **AI Development Guide**
+- **PROJECT_GUIDE.md**: Comprehensive documentation for AI interactions with this codebase
+
 ### 🔌 API Endpoints
 
 The portfolio includes these Netlify Functions:
