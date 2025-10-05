@@ -27,6 +27,8 @@ window.PortfolioApp = {
         this.setupMorphingText();
         this.setupInteractiveAvatar();
         this.setupAdvancedScrollEffects();
+        this.setupTechStackFilters();
+        this.setupEnhancedTechCards();
         
         console.log('🚀 Astonishing Portfolio initialized with advanced effects!');
     },
@@ -1398,6 +1400,179 @@ window.PortfolioApp = {
             }
             element.textContent = Math.floor(current) + '+';
         }, 16);
+    },
+
+    /* ========================================
+       ASTONISHING TECH STACK FEATURES
+       ======================================== */
+
+    // Tech Stack Filter System
+    setupTechStackFilters() {
+        const filterButtons = document.querySelectorAll('.tech-filter-btn');
+        const techCards = document.querySelectorAll('.tech-card');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.dataset.filter;
+                
+                // Update active button
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Filter cards with animation
+                techCards.forEach((card, index) => {
+                    const cardCategory = card.dataset.category;
+                    
+                    if (filter === 'all' || cardCategory === filter) {
+                        setTimeout(() => {
+                            card.classList.remove('filtered-out');
+                            card.classList.add('filtered-in');
+                        }, index * 50);
+                    } else {
+                        card.classList.remove('filtered-in');
+                        card.classList.add('filtered-out');
+                    }
+                });
+            });
+        });
+    },
+
+    // Enhanced Tech Cards with 3D Effects
+    setupEnhancedTechCards() {
+        const techCards = document.querySelectorAll('.tech-card');
+        
+        techCards.forEach(card => {
+            // 3D tilt effect on mouse move
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const mouseX = (e.clientX - centerX) / (rect.width / 2);
+                const mouseY = (e.clientY - centerY) / (rect.height / 2);
+                
+                const rotateX = mouseY * 10;
+                const rotateY = -mouseX * 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(20px)`;
+            });
+            
+            // Reset on mouse leave
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+            });
+            
+            // Animate proficiency bars on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const proficiencyBar = entry.target.querySelector('.proficiency-fill');
+                        const percentage = entry.target.dataset.proficiency || '0';
+                        
+                        setTimeout(() => {
+                            proficiencyBar.style.width = percentage + '%';
+                        }, 500);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(card);
+        });
+    },
+
+    // Enhanced Tech Stack Loading with Astonishing Cards
+    async loadTechStack() {
+        try {
+            const response = await fetch('/.netlify/functions/tech-stack');
+            if (!response.ok) throw new Error('Failed to fetch tech stack');
+            
+            const techStack = await response.json();
+            const container = document.getElementById('tech-stack-container');
+            
+            if (!container) return;
+            
+            // Clear existing content
+            container.innerHTML = '';
+            
+            // Create astonishing tech cards
+            techStack.forEach((tech, index) => {
+                const card = this.createAstonishingTechCard(tech, index);
+                container.appendChild(card);
+            });
+            
+            // Initialize enhanced features
+            this.setupEnhancedTechCards();
+            this.setupTechStackFilters();
+            
+        } catch (error) {
+            console.error('Error loading tech stack:', error);
+            this.showFallbackTechStack();
+        }
+    },
+
+    // Create Astonishing Tech Card
+    createAstonishingTechCard(tech, index) {
+        const card = document.createElement('div');
+        card.className = 'tech-card';
+        card.dataset.category = tech.category;
+        card.dataset.proficiency = tech.proficiency;
+        
+        // Staggered animation delay
+        card.style.animationDelay = `${index * 100}ms`;
+        
+        card.innerHTML = `
+            <div class="tech-card-icon">
+                ${tech.icon || tech.name.charAt(0).toUpperCase()}
+            </div>
+            
+            <h3 class="tech-card-title">${tech.name}</h3>
+            
+            <p class="tech-card-description">${tech.description}</p>
+            
+            <div class="tech-card-proficiency">
+                <div class="proficiency-label">Proficiency</div>
+                <div class="proficiency-bar">
+                    <div class="proficiency-fill" style="width: 0%"></div>
+                    <div class="proficiency-percentage">${tech.proficiency}%</div>
+                </div>
+            </div>
+            
+            <div class="tech-card-category ${tech.category}">
+                ${tech.category}
+            </div>
+            
+            <!-- Hover glow effect -->
+            <div class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl blur-xl"></div>
+            </div>
+        `;
+        
+        return card;
+    },
+
+    // Fallback Tech Stack
+    showFallbackTechStack() {
+        const container = document.getElementById('tech-stack-container');
+        if (!container) return;
+        
+        const fallbackTech = [
+            { name: 'Python', description: 'Primary language for backend development', proficiency: 95, category: 'backend', icon: 'P' },
+            { name: 'Django', description: 'High-level Python web framework', proficiency: 90, category: 'backend', icon: 'D' },
+            { name: 'React', description: 'Modern JavaScript library for UIs', proficiency: 88, category: 'frontend', icon: 'R' },
+            { name: 'JavaScript', description: 'Dynamic programming language', proficiency: 85, category: 'frontend', icon: 'J' },
+            { name: 'PostgreSQL', description: 'Advanced relational database', proficiency: 85, category: 'database', icon: 'P' },
+            { name: 'Redis', description: 'In-memory data structure store', proficiency: 75, category: 'tools', icon: 'R' },
+            { name: 'Docker', description: 'Containerization platform', proficiency: 80, category: 'tools', icon: 'D' },
+            { name: 'Git', description: 'Version control system', proficiency: 90, category: 'tools', icon: 'G' }
+        ];
+        
+        fallbackTech.forEach((tech, index) => {
+            const card = this.createAstonishingTechCard(tech, index);
+            container.appendChild(card);
+        });
+        
+        this.setupEnhancedTechCards();
+        this.setupTechStackFilters();
     },
     
     // Utility functions

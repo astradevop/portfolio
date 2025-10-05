@@ -420,6 +420,194 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
 }
 
+/* ========================================
+   ASTONISHING TECH STACK SECTION
+   ======================================== */
+
+/* Tech Stack Background */
+.tech-stack-bg {
+    background: linear-gradient(135deg, 
+        rgba(249, 250, 251, 0.8) 0%, 
+        rgba(243, 244, 246, 0.9) 25%, 
+        rgba(255, 255, 255, 0.95) 50%, 
+        rgba(243, 244, 246, 0.9) 75%, 
+        rgba(249, 250, 251, 0.8) 100%);
+    backdrop-filter: blur(20px);
+}
+
+.dark .tech-stack-bg {
+    background: linear-gradient(135deg, 
+        rgba(17, 24, 39, 0.95) 0%, 
+        rgba(31, 41, 55, 0.9) 25%, 
+        rgba(55, 65, 81, 0.85) 50%, 
+        rgba(31, 41, 55, 0.9) 75%, 
+        rgba(17, 24, 39, 0.95) 100%);
+}
+
+/* Tech Filter Buttons */
+.tech-filter-btn {
+    @apply relative px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50 rounded-full shadow-soft hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1;
+}
+
+.tech-filter-btn.active {
+    @apply text-white;
+}
+
+.tech-filter-btn.active .absolute {
+    @apply opacity-100;
+}
+
+.tech-filter-btn:hover .absolute {
+    @apply opacity-100;
+}
+
+/* Enhanced Tech Cards */
+.tech-card {
+    @apply relative group bg-glass backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-8 shadow-glass hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.tech-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        rgba(255, 255, 255, 0.05) 50%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tech-card:hover::before {
+    opacity: 1;
+}
+
+.tech-card-icon {
+    @apply relative w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shadow-xl mb-6 transform-gpu;
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6, #EC4899);
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+}
+
+.tech-card:hover .tech-card-icon {
+    transform: rotateY(180deg) scale(1.1);
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tech-card-title {
+    @apply text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors;
+}
+
+.tech-card-description {
+    @apply text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4;
+}
+
+.tech-card-proficiency {
+    @apply mb-4;
+}
+
+.proficiency-label {
+    @apply text-xs font-medium text-gray-500 dark:text-gray-400 mb-2;
+}
+
+.proficiency-bar {
+    @apply relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+}
+
+.proficiency-fill {
+    @apply absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out;
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899);
+    background-size: 200% 100%;
+    animation: gradient-shift 2s ease infinite;
+}
+
+.proficiency-percentage {
+    @apply absolute top-0 right-0 text-xs font-bold text-gray-700 dark:text-gray-300 mt-1;
+}
+
+.tech-card-category {
+    @apply inline-block px-3 py-1 text-xs font-medium rounded-full;
+}
+
+.tech-card-category.frontend {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300;
+}
+
+.tech-card-category.backend {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300;
+}
+
+.tech-card-category.tools {
+    @apply bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300;
+}
+
+.tech-card-category.database {
+    @apply bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300;
+}
+
+/* Floating Tech Elements */
+.floating-tech-elements {
+    pointer-events: none;
+}
+
+.skill-indicator,
+.experience-timeline {
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .skill-indicator,
+.dark .experience-timeline {
+    background: rgba(17, 24, 39, 0.3);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+/* Tech Card Hover Effects */
+.tech-card:hover {
+    transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.tech-card:hover .tech-card-icon {
+    box-shadow: 
+        0 20px 40px -12px rgba(59, 130, 246, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Filter Animation */
+.tech-card.filtered-out {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.tech-card.filtered-in {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tech-card {
+        @apply p-6;
+    }
+    
+    .tech-card-icon {
+        @apply w-12 h-12 text-lg;
+    }
+    
+    .floating-tech-elements {
+        @apply hidden;
+    }
+}
+
 /* Smooth transitions */
 * {
     transition-property: background-color, border-color, color, fill, stroke;
